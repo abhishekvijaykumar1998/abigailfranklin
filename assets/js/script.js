@@ -5,13 +5,13 @@
 // MIT License
 
 // element toggle function
-const elementToggleFunc = function (elem) { elem.classList.toggle("active"); }
+var elementToggleFunc = function (elem) { elem.classList.toggle("active"); }
 
 
 
 // sidebar variables
-const sidebar = document.querySelector("[data-sidebar]");
-const sidebarBtn = document.querySelector("[data-sidebar-btn]");
+var sidebar = document.querySelector("[data-sidebar]");
+var sidebarBtn = document.querySelector("[data-sidebar-btn]");
 
 // sidebar toggle functionality for mobile
 sidebarBtn.addEventListener("click", function () { elementToggleFunc(sidebar); });
@@ -19,32 +19,57 @@ sidebarBtn.addEventListener("click", function () { elementToggleFunc(sidebar); }
 
 
 // testimonials variables
-const testimonialsItem = document.querySelectorAll("[data-testimonials-item]");
-const modalContainer = document.querySelector("[data-modal-container]");
-const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
-const overlay = document.querySelector("[data-overlay]");
+var testimonialsItem = document.querySelectorAll("[data-testimonials-item]");
+var modalContainer = document.querySelector("[data-modal-container]");
+var modalCloseBtn = document.querySelector("[data-modal-close-btn]");
+var overlay = document.querySelector("[data-overlay]");
 
 // modal variable
-const modalImg = document.querySelector("[data-modal-img]");
-const modalTitle = document.querySelector("[data-modal-title]");
-const modalText = document.querySelector("[data-modal-text]");
+var modalImg = document.querySelector("[data-modal-img]");
+var modalTitle = document.querySelector("[data-modal-title]");
+var modalText = document.querySelector("[data-modal-text]");
 
 // modal toggle function
-const testimonialsModalFunc = function () {
+var testimonialsModalFunc = function () {
   modalContainer.classList.toggle("active");
   overlay.classList.toggle("active");
 }
 
 // add click event to all modal items
-for (let i = 0; i < testimonialsItem.length; i++) {
+for (var i = 0; i < testimonialsItem.length; i++) {
 
   testimonialsItem[i].addEventListener("click", function () {
 
-    modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
-    modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
-    modalTitle.innerHTML = this.querySelector("[data-testimonials-title]").innerHTML;
-    modalTitle.innerHTML = this.querySelector("[data-testimonials-subtitle]").innerHTML; 
-    modalText.innerHTML = this.querySelector("[data-testimonials-text]").innerHTML;
+    // Try to get avatar - if it doesn't exist, use a placeholder
+    var avatarElement = this.querySelector("[data-testimonials-avatar]");
+    if (avatarElement) {
+      modalImg.src = avatarElement.src;
+      modalImg.alt = avatarElement.alt;
+    } else {
+      // Use a placeholder or default image if avatar not found
+      modalImg.src = "./assets/images/avatar-placeholder.png";
+      modalImg.alt = "Testimonial Author";
+    }
+    
+    // Get title and subtitle
+    var titleElement = this.querySelector("[data-testimonials-title]");
+    var subtitleElement = this.querySelector("[data-testimonials-subtitle]");
+    
+    // Build the modal title HTML with both name and subtitle
+    var modalTitleHTML = '';
+    if (titleElement) {
+      modalTitleHTML += '<h4 class="h3">' + titleElement.innerHTML + '</h4>';
+    }
+    if (subtitleElement) {
+      modalTitleHTML += '<h5 class="h5" style="color: var(--light-gray-70); margin-top: 5px;">' + subtitleElement.innerHTML + '</h5>';
+    }
+    modalTitle.innerHTML = modalTitleHTML;
+    
+    // Get testimonial text
+    var textElement = this.querySelector("[data-testimonials-text]");
+    if (textElement) {
+      modalText.innerHTML = textElement.innerHTML;
+    }
 
     testimonialsModalFunc();
 
@@ -57,74 +82,173 @@ modalCloseBtn.addEventListener("click", testimonialsModalFunc);
 overlay.addEventListener("click", testimonialsModalFunc);
 
 
+// ----
+// SIMPLIFIED PORTFOLIO FILTER - Safari Compatible Version
+// ----
 
-// custom select variables
-const select = document.querySelector("[data-select]");
-const selectItems = document.querySelectorAll("[data-select-item]");
-const selectValue = document.querySelector("[data-selecct-value]");
-const filterBtn = document.querySelectorAll("[data-filter-btn]");
-
-select.addEventListener("click", function () { elementToggleFunc(this); });
-
-// add event in all select items
-for (let i = 0; i < selectItems.length; i++) {
-  selectItems[i].addEventListener("click", function () {
-
-    let selectedValue = this.innerText.toLowerCase();
-    selectValue.innerText = this.innerText;
-    elementToggleFunc(select);
-    filterFunc(selectedValue);
-
-  });
-}
-
-// filter variables
-const filterItems = document.querySelectorAll("[data-filter-item]");
-
-const filterFunc = function (selectedValue) {
-
-  for (let i = 0; i < filterItems.length; i++) {
-
-    if (selectedValue === "all") {
-      filterItems[i].classList.add("active");
-    } else if (selectedValue === filterItems[i].dataset.category) {
-      filterItems[i].classList.add("active");
-    } else {
-      filterItems[i].classList.remove("active");
-    }
-
+function initPortfolioFilters() {
+  // Get ALL select buttons (one for Articles, one for Podcast)
+  var allSelectButtons = document.querySelectorAll("[data-select]");
+  
+  console.log('Found ' + allSelectButtons.length + ' dropdown buttons');
+  
+  // Add click handler to each select button
+  for (var i = 0; i < allSelectButtons.length; i++) {
+    (function(selectBtn, index) {
+      selectBtn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        
+        // Close all other dropdowns
+        for (var j = 0; j < allSelectButtons.length; j++) {
+          if (allSelectButtons[j] !== selectBtn) {
+            allSelectButtons[j].classList.remove("active");
+          }
+        }
+        
+        // Toggle this dropdown
+        this.classList.toggle("active");
+        console.log('Dropdown ' + index + ' toggled to: ' + this.classList.contains("active"));
+      });
+    })(allSelectButtons[i], i);
   }
-
-}
-
-// add event in all filter button items for large screen
-let lastClickedBtn = filterBtn[0];
-
-for (let i = 0; i < filterBtn.length; i++) {
-
-  filterBtn[i].addEventListener("click", function () {
-
-    let selectedValue = this.innerText.toLowerCase();
-    selectValue.innerText = this.innerText;
-    filterFunc(selectedValue);
-
-    lastClickedBtn.classList.remove("active");
-    this.classList.add("active");
-    lastClickedBtn = this;
-
+  
+  // Get ALL select items (from both dropdowns)
+  var allSelectItems = document.querySelectorAll("[data-select-item]");
+  
+  console.log('Found ' + allSelectItems.length + ' dropdown items');
+  
+  // Add click handler to each select item
+  for (var i = 0; i < allSelectItems.length; i++) {
+    allSelectItems[i].addEventListener("click", function(e) {
+      e.stopPropagation();
+      
+      // Find the parent portfolio page
+      var portfolioPage = findClosest(this, ".portfolio");
+      if (!portfolioPage) return;
+      
+      // Find elements within this specific portfolio page
+      var selectValue = portfolioPage.querySelector("[data-select-value]");
+      var select = portfolioPage.querySelector("[data-select]");
+      var filterItems = portfolioPage.querySelectorAll("[data-filter-item]");
+      
+      var selectedText = this.innerText;
+      var selectedValue = selectedText.toLowerCase();
+      
+      console.log('Selected: ' + selectedText + ' on page: ' + portfolioPage.dataset.page);
+      
+      // Update display
+      if (selectValue) {
+        selectValue.innerText = selectedText;
+      }
+      
+      // Close dropdown
+      if (select) {
+        select.classList.remove("active");
+      }
+      
+      // Filter items
+      for (var j = 0; j < filterItems.length; j++) {
+        if (selectedValue === "all" || filterItems[j].dataset.category === selectedValue) {
+          filterItems[j].classList.add("active");
+        } else {
+          filterItems[j].classList.remove("active");
+        }
+      }
+    });
+  }
+  
+  // Get ALL filter buttons (desktop view)
+  var allFilterBtns = document.querySelectorAll("[data-filter-btn]");
+  
+  console.log('Found ' + allFilterBtns.length + ' filter buttons');
+  
+  for (var i = 0; i < allFilterBtns.length; i++) {
+    allFilterBtns[i].addEventListener("click", function() {
+      // Find the parent portfolio page
+      var portfolioPage = findClosest(this, ".portfolio");
+      if (!portfolioPage) return;
+      
+      // Find elements within this specific portfolio page
+      var selectValue = portfolioPage.querySelector("[data-select-value]");
+      var filterItems = portfolioPage.querySelectorAll("[data-filter-item]");
+      var siblingBtns = portfolioPage.querySelectorAll("[data-filter-btn]");
+      
+      var selectedText = this.innerText;
+      var selectedValue = selectedText.toLowerCase();
+      
+      console.log('Filter button clicked: ' + selectedText);
+      
+      // Update display
+      if (selectValue) {
+        selectValue.innerText = selectedText;
+      }
+      
+      // Filter items
+      for (var j = 0; j < filterItems.length; j++) {
+        if (selectedValue === "all" || filterItems[j].dataset.category === selectedValue) {
+          filterItems[j].classList.add("active");
+        } else {
+          filterItems[j].classList.remove("active");
+        }
+      }
+      
+      // Update button states
+      for (var j = 0; j < siblingBtns.length; j++) {
+        siblingBtns[j].classList.remove("active");
+      }
+      this.classList.add("active");
+    });
+  }
+  
+  // Close all dropdowns when clicking outside
+  document.addEventListener("click", function(e) {
+    // Check if click is outside any filter-select-box
+    var clickedInsideDropdown = findClosest(e.target, ".filter-select-box");
+    
+    if (!clickedInsideDropdown) {
+      for (var i = 0; i < allSelectButtons.length; i++) {
+        allSelectButtons[i].classList.remove("active");
+      }
+    }
   });
-
 }
+
+// Helper function for Safari (replaces .closest())
+function findClosest(element, selector) {
+  // If browser supports closest, use it
+  if (element.closest) {
+    return element.closest(selector);
+  }
+  
+  // Fallback for older Safari versions
+  var current = element;
+  while (current && current !== document) {
+    if (current.matches && current.matches(selector)) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+  return null;
+}
+
+// Initialize filters when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPortfolioFilters);
+} else {
+  initPortfolioFilters();
+}
+
+// -----
 
 
 
 // contact form variables
-const form = document.querySelector("[data-form]");
-const formInputs = document.querySelectorAll("[data-form-input]");
-const formBtn = document.querySelector("[data-form-btn]");
+var form = document.querySelector("[data-form]");
+var formInputs = document.querySelectorAll("[data-form-input]");
+var formBtn = document.querySelector("[data-form-btn]");
 
 // add event to all form input field
-for (let i = 0; i < formInputs.length; i++) {
+for (var i = 0; i < formInputs.length; i++) {
   formInputs[i].addEventListener("input", function () {
 
     // check form validation
@@ -140,14 +264,14 @@ for (let i = 0; i < formInputs.length; i++) {
 
 
 // page navigation variables
-const navigationLinks = document.querySelectorAll("[data-nav-link]");
-const pages = document.querySelectorAll("[data-page]");
+var navigationLinks = document.querySelectorAll("[data-nav-link]");
+var pages = document.querySelectorAll("[data-page]");
 
 // add event to all nav link
-for (let i = 0; i < navigationLinks.length; i++) {
+for (var i = 0; i < navigationLinks.length; i++) {
   navigationLinks[i].addEventListener("click", function () {
 
-    for (let i = 0; i < pages.length; i++) {
+    for (var i = 0; i < pages.length; i++) {
       if (this.innerHTML.toLowerCase() === pages[i].dataset.page) {
         pages[i].classList.add("active");
         navigationLinks[i].classList.add("active");
